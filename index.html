@@ -46,9 +46,25 @@
 
     <!-- HOME SECTION -->
     <section id="home" class="max-w-2xl mx-auto px-4 py-6">
-      <div id="clock" class="text-center mb-6">
-        <p class="text-3xl font-bold text-white" id="clock-time">--:--</p>
-        <p class="text-slate-400 text-sm" id="clock-day">Loading...</p>
+      <div id="clock" class="flex items-center justify-between mb-6 gap-4">
+        <div>
+          <p class="text-3xl font-bold text-white" id="clock-time">--:--</p>
+          <p class="text-slate-400 text-sm" id="clock-day">Loading...</p>
+        </div>
+        <div class="flex flex-col gap-1 items-end">
+          <label for="day-select" class="text-xs text-slate-500 font-medium">Show services for</label>
+          <select id="day-select"
+            class="rounded-lg bg-slate-800 border border-slate-600 text-white text-sm px-3 py-1.5 focus:border-amber-500 outline-none transition-colors cursor-pointer">
+            <option value="today">Today</option>
+            <option value="0">Sunday</option>
+            <option value="1">Monday</option>
+            <option value="2">Tuesday</option>
+            <option value="3">Wednesday</option>
+            <option value="4">Thursday</option>
+            <option value="5">Friday</option>
+            <option value="6">Saturday</option>
+          </select>
+        </div>
       </div>
       <div id="filter-bar-home" class="flex gap-2 overflow-x-auto pb-2 mb-4 sticky top-14 bg-slate-900 py-2 z-10"></div>
       <div id="cards-home" class="flex flex-col gap-4"></div>

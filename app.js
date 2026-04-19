@@ -18,7 +18,7 @@ var STATUS_CLASSES = {
 
 function renderCard(service, mode) {
   // mode: 'home' (shows open/closed status) or 'directory' (shows last_verified)
-  var status = getServiceStatus(service);
+  var status = getServiceStatus(service, getEffectiveNow());
   var stale = isStale(service);
   var cat = CATEGORIES[service.category] || CATEGORIES.other;
   var isDimmed = mode === 'home' && status.status === 'closed';
@@ -75,19 +75,36 @@ function renderCard(service, mode) {
 
 var DAYS_FULL = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 
+// The day index to use for status checks — null means "use real now"
+var selectedDayOverride = null;
+
+// Returns a Date to use for status — either real now, or noon on the selected day
+function getEffectiveNow() {
+  if (selectedDayOverride === null) return new Date();
+  var d = new Date();
+  var diff = selectedDayOverride - d.getDay();
+  d.setDate(d.getDate() + diff);
+  d.setHours(12, 0, 0, 0); // use noon so "opens later" / "open" logic is realistic
+  return d;
+}
+
 function updateClock() {
   var now = new Date();
   var hh = String(now.getHours()).padStart(2, '0');
   var mm = String(now.getMinutes()).padStart(2, '0');
   document.getElementById('clock-time').textContent = hh + ':' + mm;
-  document.getElementById('clock-day').textContent = DAYS_FULL[now.getDay()];
+  document.getElementById('clock-day').textContent =
+    selectedDayOverride === null
+      ? DAYS_FULL[now.getDay()]
+      : DAYS_FULL[selectedDayOverride] + ' (preview)';
 }
 
 function sortForHome(services) {
   var order = { open: 0, opens_later: 1, closed: 2 };
+  var now = getEffectiveNow();
   return services.slice().sort(function(a, b) {
-    var sa = getServiceStatus(a).status;
-    var sb = getServiceStatus(b).status;
+    var sa = getServiceStatus(a, now).status;
+    var sb = getServiceStatus(b, now).status;
     return (order[sa] || 2) - (order[sb] || 2);
   });
 }
@@ -214,7 +231,7 @@ document.addEventListener('DOMContentLoaded', function() {
     e.preventDefault();
 
     // Replace YOUR_FORMSPREE_ID with the actual endpoint from formspree.io
-    var FORMSPREE_ENDPOINT = 'https://formspree.io/f/YOUR_FORMSPREE_ID';
+    var FORMSPREE_ENDPOINT = 'https://formspree.io/f/xdayzvav';
 
     var data = {};
     new FormData(form).forEach(function(val, key) { data[key] = val; });
@@ -247,6 +264,14 @@ document.addEventListener('DOMContentLoaded', function() {
       btn.disabled = false;
       btn.textContent = 'Submit suggestion';
     });
+  });
+
+  // Day selector
+  document.getElementById('day-select').addEventListener('change', function() {
+    var val = this.value;
+    selectedDayOverride = val === 'today' ? null : parseInt(val, 10);
+    updateClock();
+    applyHomeFilter(activeHomeCategory);
   });
 
   showSection('home');
