@@ -73,6 +73,35 @@ function renderCard(service, mode) {
   '</article>';
 }
 
+var DAYS_FULL = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+
+function updateClock() {
+  var now = new Date();
+  var hh = String(now.getHours()).padStart(2, '0');
+  var mm = String(now.getMinutes()).padStart(2, '0');
+  document.getElementById('clock-time').textContent = hh + ':' + mm;
+  document.getElementById('clock-day').textContent = DAYS_FULL[now.getDay()];
+}
+
+function sortForHome(services) {
+  var order = { open: 0, opens_later: 1, closed: 2 };
+  return services.slice().sort(function(a, b) {
+    var sa = getServiceStatus(a).status;
+    var sb = getServiceStatus(b).status;
+    return (order[sa] || 2) - (order[sb] || 2);
+  });
+}
+
+function renderHomeCards(services) {
+  var container = document.getElementById('cards-home');
+  var sorted = sortForHome(services);
+  container.innerHTML = sorted.map(function(s) {
+    return renderCard(s, 'home');
+  }).join('');
+}
+
 document.addEventListener('DOMContentLoaded', function() {
-  console.log('Blackpool Help loaded. Services:', SERVICES.length);
+  updateClock();
+  setInterval(updateClock, 60000);
+  renderHomeCards(SERVICES);
 });
