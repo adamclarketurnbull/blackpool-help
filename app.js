@@ -100,8 +100,63 @@ function renderHomeCards(services) {
   }).join('');
 }
 
+var activeHomeCategory = 'all';
+var activeDirectoryCategory = 'all';
+
+function buildFilterBar(containerId, activeCategory, onSelect) {
+  var container = document.getElementById(containerId);
+  var filters = ['all'].concat(Object.keys(CATEGORIES));
+  container.innerHTML = filters.map(function(cat) {
+    var label = cat === 'all' ? 'All' : (CATEGORIES[cat] ? CATEGORIES[cat].label : cat);
+    var isActive = cat === activeCategory;
+    var activeClass = isActive
+      ? 'bg-amber-500 text-slate-900 font-semibold'
+      : 'bg-slate-700 text-slate-300 hover:bg-slate-600';
+    return '<button ' +
+      'data-cat="' + cat + '" ' +
+      'aria-pressed="' + isActive + '" ' +
+      'class="flex-shrink-0 text-sm px-3 py-1.5 rounded-full transition-colors ' + activeClass + '">' +
+      label +
+    '</button>';
+  }).join('');
+
+  container.querySelectorAll('button').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      onSelect(btn.getAttribute('data-cat'));
+    });
+  });
+}
+
+function applyHomeFilter(category) {
+  activeHomeCategory = category;
+  window.location.hash = category === 'all' ? '' : category;
+  buildFilterBar('filter-bar-home', category, applyHomeFilter);
+  var filtered = category === 'all'
+    ? SERVICES
+    : SERVICES.filter(function(s) { return s.category === category; });
+  renderHomeCards(filtered);
+}
+
+function applyDirectoryFilter(category) {
+  activeDirectoryCategory = category;
+  buildFilterBar('filter-bar-directory', category, applyDirectoryFilter);
+  var filtered = category === 'all'
+    ? SERVICES
+    : SERVICES.filter(function(s) { return s.category === category; });
+  renderDirectoryCards(filtered);
+}
+
 document.addEventListener('DOMContentLoaded', function() {
   updateClock();
   setInterval(updateClock, 60000);
-  renderHomeCards(SERVICES);
+
+  // Read hash for initial filter
+  var hash = window.location.hash.replace('#', '');
+  var validCats = Object.keys(CATEGORIES);
+  var initCat = validCats.indexOf(hash) !== -1 ? hash : 'all';
+
+  buildFilterBar('filter-bar-home', initCat, applyHomeFilter);
+  buildFilterBar('filter-bar-directory', 'all', applyDirectoryFilter);
+
+  applyHomeFilter(initCat);
 });
