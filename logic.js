@@ -22,7 +22,7 @@ function getServiceStatus(service, now) {
       : (currentTime >= entry.from && currentTime < entry.to);
 
     if (isOpen) {
-      return { status: 'open', label: 'Open now · Closes ' + entry.to };
+      return { status: 'open', label: 'Open today · Closes ' + entry.to };
     }
 
     if (currentTime < entry.from) {

@@ -176,15 +176,21 @@ document.addEventListener('DOMContentLoaded', function() {
   updateClock();
   setInterval(updateClock, 60000);
 
-  // Read hash for initial filter
-  var hash = window.location.hash.replace('#', '');
-  var validCats = Object.keys(CATEGORIES);
-  var initCat = validCats.indexOf(hash) !== -1 ? hash : 'all';
+  loadServices().then(function() {
+    // Read hash for initial filter
+    var hash = window.location.hash.replace('#', '');
+    var validCats = Object.keys(CATEGORIES);
+    var initCat = validCats.indexOf(hash) !== -1 ? hash : 'all';
 
-  buildFilterBar('filter-bar-home', initCat, applyHomeFilter);
-  buildFilterBar('filter-bar-directory', 'all', applyDirectoryFilter);
+    buildFilterBar('filter-bar-home', initCat, applyHomeFilter);
+    buildFilterBar('filter-bar-directory', 'all', applyDirectoryFilter);
 
-  applyHomeFilter(initCat);
+    applyHomeFilter(initCat);
+  }).catch(function() {
+    document.getElementById('cards-home').innerHTML =
+      '<p class="text-slate-400 text-sm">Could not load services. Please refresh.</p>';
+  });
+
 
   // Nav view switching
   document.getElementById('nav-home').addEventListener('click', function(e) {
