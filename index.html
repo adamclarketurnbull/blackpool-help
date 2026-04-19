@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Blackpool Help — Community Services Directory</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *:focus-visible { outline: 2px solid #f59e0b; outline-offset: 3px; }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-100 font-sans antialiased min-h-screen">
+
+  <!-- NAV -->
+  <header class="fixed top-0 left-0 right-0 z-50 bg-slate-900/95 backdrop-blur border-b border-slate-800">
+    <nav class="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between" aria-label="Main navigation">
+      <a href="#home" class="font-bold text-lg text-white tracking-tight">
+        Blackpool <span class="text-amber-400">Help</span>
+      </a>
+      <div class="flex gap-4 text-sm">
+        <a href="#home"    class="text-slate-300 hover:text-white transition-colors" id="nav-home">Open Now</a>
+        <a href="#directory" class="text-slate-300 hover:text-white transition-colors" id="nav-directory">Directory</a>
+        <a href="#suggest"   class="text-slate-300 hover:text-white transition-colors" id="nav-suggest">Suggest</a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="pt-14">
+
+    <!-- HOME SECTION -->
+    <section id="home" class="max-w-2xl mx-auto px-4 py-6">
+      <div id="clock" class="text-center mb-6">
+        <p class="text-3xl font-bold text-white" id="clock-time">--:--</p>
+        <p class="text-slate-400 text-sm" id="clock-day">Loading...</p>
+      </div>
+      <div id="filter-bar-home" class="flex gap-2 overflow-x-auto pb-2 mb-4 sticky top-14 bg-slate-900 py-2 z-10"></div>
+      <div id="cards-home" class="flex flex-col gap-4"></div>
+    </section>
+
+    <!-- DIRECTORY SECTION -->
+    <section id="directory" class="max-w-2xl mx-auto px-4 py-6 hidden">
+      <h1 class="text-2xl font-bold text-white mb-2">Full Directory</h1>
+      <p class="text-slate-400 text-sm mb-4">All services — open or closed. Amber flag = info may be outdated.</p>
+      <div id="filter-bar-directory" class="flex gap-2 overflow-x-auto pb-2 mb-4 sticky top-14 bg-slate-900 py-2 z-10"></div>
+      <div id="cards-directory" class="flex flex-col gap-4"></div>
+    </section>
+
+    <!-- SUGGEST SECTION -->
+    <section id="suggest" class="max-w-2xl mx-auto px-4 py-6 hidden">
+      <h1 class="text-2xl font-bold text-white mb-2">Suggest a Listing</h1>
+      <p class="text-slate-400 text-sm mb-6">Know a service we're missing? Tell us and we'll verify and add it.</p>
+      <form id="suggest-form" class="flex flex-col gap-4">
+        <!-- form fields added in Task 8 -->
+      </form>
+    </section>
+
+  </main>
+
+  <script src="data.js"></script>
+  <script src="logic.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
