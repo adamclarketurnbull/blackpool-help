@@ -199,5 +199,48 @@ document.addEventListener('DOMContentLoaded', function() {
     e.preventDefault(); showSection('suggest');
   });
 
+  // Suggest form
+  var form = document.getElementById('suggest-form');
+  var statusEl = document.getElementById('form-status');
+
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    // Replace YOUR_FORMSPREE_ID with the actual endpoint from formspree.io
+    var FORMSPREE_ENDPOINT = 'https://formspree.io/f/YOUR_FORMSPREE_ID';
+
+    var data = {};
+    new FormData(form).forEach(function(val, key) { data[key] = val; });
+
+    var btn = form.querySelector('button[type="submit"]');
+    btn.disabled = true;
+    btn.textContent = 'Sending...';
+    statusEl.className = 'hidden text-sm rounded-lg px-3 py-2';
+
+    fetch(FORMSPREE_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify(data)
+    })
+    .then(function(res) { return res.json().then(function(body) { return { ok: res.ok, body: body }; }); })
+    .then(function(result) {
+      if (result.ok) {
+        statusEl.className = 'text-sm rounded-lg px-3 py-2 bg-green-500/20 text-green-300 border border-green-500/30';
+        statusEl.textContent = 'Thanks — we\'ll verify and add it to the directory.';
+        form.reset();
+      } else {
+        throw new Error(result.body.error || 'Submission failed');
+      }
+    })
+    .catch(function(err) {
+      statusEl.className = 'text-sm rounded-lg px-3 py-2 bg-rose-500/20 text-rose-300 border border-rose-500/30';
+      statusEl.textContent = 'Something went wrong. Please try again or call us directly.';
+    })
+    .finally(function() {
+      btn.disabled = false;
+      btn.textContent = 'Submit suggestion';
+    });
+  });
+
   showSection('home');
 });

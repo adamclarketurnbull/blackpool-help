@@ -63,7 +63,66 @@
       <h1 class="text-2xl font-bold text-white mb-2">Suggest a Listing</h1>
       <p class="text-slate-400 text-sm mb-6">Know a service we're missing? Tell us and we'll verify and add it.</p>
       <form id="suggest-form" class="flex flex-col gap-4">
-        <!-- form fields added in Task 8 -->
+        <div class="flex flex-col gap-1">
+          <label for="svc-name" class="text-sm font-medium text-slate-300">Service name <span class="text-amber-400">*</span></label>
+          <input type="text" id="svc-name" name="service_name" required
+            class="rounded-lg bg-slate-800 border border-slate-600 text-white px-3 py-2 text-sm focus:border-amber-500 outline-none transition-colors" />
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <label for="svc-category" class="text-sm font-medium text-slate-300">Category <span class="text-amber-400">*</span></label>
+          <select id="svc-category" name="category" required
+            class="rounded-lg bg-slate-800 border border-slate-600 text-white px-3 py-2 text-sm focus:border-amber-500 outline-none transition-colors">
+            <option value="">Select a category</option>
+            <option value="food">Food</option>
+            <option value="shelter">Shelter</option>
+            <option value="outreach">Outreach</option>
+            <option value="addiction">Addiction Support</option>
+            <option value="clothing">Clothing</option>
+            <option value="family">Family</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <label for="svc-offer" class="text-sm font-medium text-slate-300">What they offer</label>
+          <input type="text" id="svc-offer" name="what_they_offer"
+            placeholder="e.g. hot food, showers, laundry"
+            class="rounded-lg bg-slate-800 border border-slate-600 text-white px-3 py-2 text-sm focus:border-amber-500 outline-none transition-colors" />
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <label for="svc-address" class="text-sm font-medium text-slate-300">Address</label>
+          <input type="text" id="svc-address" name="address"
+            class="rounded-lg bg-slate-800 border border-slate-600 text-white px-3 py-2 text-sm focus:border-amber-500 outline-none transition-colors" />
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <label for="svc-phone" class="text-sm font-medium text-slate-300">Phone number</label>
+          <input type="tel" id="svc-phone" name="phone"
+            class="rounded-lg bg-slate-800 border border-slate-600 text-white px-3 py-2 text-sm focus:border-amber-500 outline-none transition-colors" />
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <label for="svc-hours" class="text-sm font-medium text-slate-300">Opening hours</label>
+          <textarea id="svc-hours" name="opening_hours" rows="2"
+            placeholder="e.g. Mon–Fri 10am–1pm, Sat 9am–12pm"
+            class="rounded-lg bg-slate-800 border border-slate-600 text-white px-3 py-2 text-sm focus:border-amber-500 outline-none transition-colors resize-none"></textarea>
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <label for="svc-contact" class="text-sm font-medium text-slate-300">Your contact (so we can verify) <span class="text-amber-400">*</span></label>
+          <input type="text" id="svc-contact" name="submitter_contact" required
+            placeholder="Name, phone, or email"
+            class="rounded-lg bg-slate-800 border border-slate-600 text-white px-3 py-2 text-sm focus:border-amber-500 outline-none transition-colors" />
+        </div>
+
+        <div id="form-status" class="hidden text-sm rounded-lg px-3 py-2"></div>
+
+        <button type="submit"
+          class="w-full rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-900 font-semibold py-3 text-sm transition-colors">
+          Submit suggestion
+        </button>
       </form>
     </section>
 
