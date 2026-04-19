@@ -168,6 +168,7 @@ function showSection(sectionId) {
     if (!el) return;
     el.classList.toggle('text-amber-400', id === sectionId);
     el.classList.toggle('text-slate-300', id !== sectionId);
+    el.setAttribute('aria-current', id === sectionId ? 'page' : 'false');
   });
 }
 
