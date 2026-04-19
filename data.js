@@ -46,22 +46,46 @@ function parseServicesCSV(text) {
   });
 }
 
+var DAY_NAMES = ['sun','mon','tue','wed','thu','fri','sat'];
+
+function expandDayRange(str) {
+  // Expands "mon-fri" shorthand into ["mon","tue","wed","thu","fri"]
+  var rangeMatch = str.match(/^([a-z]{3})-([a-z]{3})$/);
+  if (!rangeMatch) return [str];
+  var start = DAY_NAMES.indexOf(rangeMatch[1]);
+  var end   = DAY_NAMES.indexOf(rangeMatch[2]);
+  if (start === -1 || end === -1) return [str];
+  var out = [];
+  for (var i = start; i <= end; i++) out.push(DAY_NAMES[i]);
+  return out;
+}
+
 function parseHours(str) {
   if (!str) return [];
-  // Format: slots separated by ";" — each slot is "day,day,...:HH:MM-HH:MM"
   return str.split(';').map(function(slot) {
     slot = slot.trim();
-    var match = slot.match(/(\d{2}:\d{2}-\d{2}:\d{2})$/);
-    if (!match) return null;
-    var timeRange = match[1];
-    var daysPart = slot.slice(0, slot.length - timeRange.length - 1);
-    var times = timeRange.split('-');
-    return {
-      days: daysPart.split(',').map(function(d){ return d.trim(); }).filter(Boolean),
-      from: times[0],
-      to: times[1]
-    };
+    // Match HH:MM-HH:MM at end, or bare HH:MM at end (no closing time)
+    var rangeMatch = slot.match(/(\d{2}:\d{2}-\d{2}:\d{2})$/);
+    var singleMatch = !rangeMatch && slot.match(/(\d{2}:\d{2})$/);
+    if (!rangeMatch && !singleMatch) return null;
+
+    var timeRange = rangeMatch ? rangeMatch[1] : singleMatch[1];
+    var daysPart  = slot.slice(0, slot.length - timeRange.length - 1);
+    var times     = rangeMatch ? timeRange.split('-') : [timeRange, addHour(timeRange)];
+
+    var days = [];
+    daysPart.split(',').forEach(function(d) {
+      expandDayRange(d.trim()).forEach(function(day) { days.push(day); });
+    });
+
+    return { days: days.filter(Boolean), from: times[0], to: times[1] };
   }).filter(Boolean);
+}
+
+function addHour(time) {
+  var parts = time.split(':');
+  var h = (parseInt(parts[0], 10) + 1) % 24;
+  return String(h).padStart(2, '0') + ':' + parts[1];
 }
 
 function parseCSVRow(row) {
