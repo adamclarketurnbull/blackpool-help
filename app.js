@@ -146,6 +146,31 @@ function applyDirectoryFilter(category) {
   renderDirectoryCards(filtered);
 }
 
+function renderDirectoryCards(services) {
+  // Sort: fresh first, stale last
+  var sorted = services.slice().sort(function(a, b) {
+    var aStale = isStale(a) ? 1 : 0;
+    var bStale = isStale(b) ? 1 : 0;
+    return aStale - bStale;
+  });
+  var container = document.getElementById('cards-directory');
+  container.innerHTML = sorted.map(function(s) {
+    return renderCard(s, 'directory');
+  }).join('');
+}
+
+function showSection(sectionId) {
+  ['home','directory','suggest'].forEach(function(id) {
+    document.getElementById(id).classList.toggle('hidden', id !== sectionId);
+  });
+  ['home','directory','suggest'].forEach(function(id) {
+    var el = document.getElementById('nav-' + id);
+    if (!el) return;
+    el.classList.toggle('text-amber-400', id === sectionId);
+    el.classList.toggle('text-slate-300', id !== sectionId);
+  });
+}
+
 document.addEventListener('DOMContentLoaded', function() {
   updateClock();
   setInterval(updateClock, 60000);
@@ -159,4 +184,20 @@ document.addEventListener('DOMContentLoaded', function() {
   buildFilterBar('filter-bar-directory', 'all', applyDirectoryFilter);
 
   applyHomeFilter(initCat);
+
+  // Nav view switching
+  document.getElementById('nav-home').addEventListener('click', function(e) {
+    e.preventDefault(); showSection('home');
+  });
+  document.getElementById('nav-directory').addEventListener('click', function(e) {
+    e.preventDefault();
+    renderDirectoryCards(SERVICES);
+    buildFilterBar('filter-bar-directory', 'all', applyDirectoryFilter);
+    showSection('directory');
+  });
+  document.getElementById('nav-suggest').addEventListener('click', function(e) {
+    e.preventDefault(); showSection('suggest');
+  });
+
+  showSection('home');
 });
