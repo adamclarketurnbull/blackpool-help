@@ -1,4 +1,78 @@
 // app.js — DOM, rendering, filtering, form
+
+var CATEGORIES = {
+  food:      { label: 'Food',     color: 'bg-green-500/20 text-green-300 border-green-500/30' },
+  shelter:   { label: 'Shelter',  color: 'bg-blue-500/20 text-blue-300 border-blue-500/30' },
+  outreach:  { label: 'Outreach', color: 'bg-purple-500/20 text-purple-300 border-purple-500/30' },
+  addiction: { label: 'Addiction Support', color: 'bg-rose-500/20 text-rose-300 border-rose-500/30' },
+  clothing:  { label: 'Clothing', color: 'bg-orange-500/20 text-orange-300 border-orange-500/30' },
+  family:    { label: 'Family',   color: 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30' },
+  other:     { label: 'Other',    color: 'bg-slate-500/20 text-slate-300 border-slate-500/30' }
+};
+
+var STATUS_CLASSES = {
+  open:        'text-green-400',
+  opens_later: 'text-slate-400',
+  closed:      'text-slate-600'
+};
+
+function renderCard(service, mode) {
+  // mode: 'home' (shows open/closed status) or 'directory' (shows last_verified)
+  var status = getServiceStatus(service);
+  var stale = isStale(service);
+  var cat = CATEGORIES[service.category] || CATEGORIES.other;
+  var isDimmed = mode === 'home' && status.status === 'closed';
+  var phone = service.phone;
+
+  var tagsHtml = service.what_they_offer.map(function(t) {
+    return '<span class="text-xs px-2 py-0.5 rounded-full bg-slate-700 text-slate-300">' + t + '</span>';
+  }).join('');
+
+  var staleHtml = stale
+    ? '<p class="text-xs text-amber-400 mt-2">⚠ Info may be outdated — last verified ' + service.last_verified + '</p>'
+    : '';
+
+  var verifiedHtml = mode === 'directory'
+    ? '<p class="text-xs text-slate-500 mt-2">Last verified: ' + service.last_verified + (stale ? ' ⚠' : '') + '</p>'
+    : '';
+
+  var referralHtml = service.referral_needed
+    ? '<p class="text-xs text-amber-300 mt-2 font-medium">Referral required — ' + service.referral_contact + '</p>'
+    : '';
+
+  var urlHtml = service.url
+    ? '<a href="' + service.url + '" target="_blank" rel="noopener" class="text-xs text-slate-400 hover:text-amber-400 underline mt-1 inline-block">Website / Facebook</a>'
+    : '';
+
+  var statusClass = STATUS_CLASSES[status.status] || STATUS_CLASSES.closed;
+  var cardOpacity = isDimmed ? 'opacity-50' : '';
+
+  return '<article class="rounded-xl border border-slate-700 bg-slate-800 p-4 flex flex-col gap-3 ' + cardOpacity + '">' +
+    '<div class="flex items-start justify-between gap-2">' +
+      '<div>' +
+        '<span class="text-xs px-2 py-0.5 rounded-full border ' + cat.color + ' font-medium">' + cat.label + '</span>' +
+        '<h2 class="mt-2 text-base font-bold text-white leading-snug">' + service.name + '</h2>' +
+      '</div>' +
+    '</div>' +
+    '<p class="text-sm text-slate-400 leading-relaxed">' + service.description + '</p>' +
+    '<div class="flex flex-wrap gap-1.5">' + tagsHtml + '</div>' +
+    '<p class="text-xs text-slate-500">' + service.address + '</p>' +
+    (mode === 'home' ? '<p class="text-sm font-medium ' + statusClass + '">' + status.label + '</p>' : '') +
+    referralHtml +
+    staleHtml +
+    verifiedHtml +
+    urlHtml +
+    '<a href="tel:' + phone.replace(/\s/g, '') + '" ' +
+      'aria-label="Call ' + service.name + ' on ' + phone + '" ' +
+      'class="mt-1 w-full flex items-center justify-center gap-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-900 font-semibold text-sm py-2.5 transition-colors">' +
+      '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">' +
+        '<path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.338c0 10.28 8.182 18.6 18.375 18.6a18.45 18.45 0 004.518-.563l-4.19-4.19a14.25 14.25 0 01-5.168 1.005c-5.318 0-9.803-3.528-11.52-8.438L2.25 6.338z"/>' +
+      '</svg>' +
+      phone +
+    '</a>' +
+  '</article>';
+}
+
 document.addEventListener('DOMContentLoaded', function() {
   console.log('Blackpool Help loaded. Services:', SERVICES.length);
 });
