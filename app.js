@@ -1,5 +1,10 @@
 // app.js — DOM, rendering, filtering, form
 
+// ─── Category config ───────────────────────────────────────────────────────────
+// To enable more categories in future releases, add them to ENABLED_CATEGORIES.
+// e.g. ['food','shelter','outreach'] — or 'all' to show everything.
+var ENABLED_CATEGORIES = ['food'];
+
 var CATEGORIES = {
   food:      { label: 'Food',     color: 'bg-green-500/20 text-green-300 border-green-500/30' },
   shelter:   { label: 'Shelter',  color: 'bg-blue-500/20 text-blue-300 border-blue-500/30' },
@@ -40,8 +45,35 @@ function renderCard(service, mode) {
     ? '<p class="text-xs text-amber-300 mt-2 font-medium">Referral required — ' + service.referral_contact + '</p>'
     : '';
 
-  var urlHtml = service.url
-    ? '<a href="' + service.url + '" target="_blank" rel="noopener" class="text-xs text-slate-400 hover:text-amber-400 underline mt-1 inline-block">Website / Facebook</a>'
+  // Primary CTA: website/Facebook if available, else phone
+  var primaryBtn = service.url
+    ? '<a href="' + service.url + '" target="_blank" rel="noopener" ' +
+        'aria-label="Visit ' + service.name + ' website" ' +
+        'class="mt-1 w-full flex items-center justify-center gap-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-900 font-semibold text-sm py-2.5 transition-colors">' +
+        '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">' +
+          '<path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"/>' +
+        '</svg>' +
+        'Website / Facebook' +
+      '</a>'
+    : '<a href="tel:' + phone.replace(/\s/g, '') + '" ' +
+        'aria-label="Call ' + service.name + ' on ' + phone + '" ' +
+        'class="mt-1 w-full flex items-center justify-center gap-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-900 font-semibold text-sm py-2.5 transition-colors">' +
+        '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">' +
+          '<path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.338c0 10.28 8.182 18.6 18.375 18.6a18.45 18.45 0 004.518-.563l-4.19-4.19a14.25 14.25 0 01-5.168 1.005c-5.318 0-9.803-3.528-11.52-8.438L2.25 6.338z"/>' +
+        '</svg>' +
+        phone +
+      '</a>';
+
+  // Secondary: phone link (only shown when website is the primary)
+  var phoneBtn = (service.url && phone)
+    ? '<a href="tel:' + phone.replace(/\s/g, '') + '" ' +
+        'aria-label="Call ' + service.name + ' on ' + phone + '" ' +
+        'class="w-full flex items-center justify-center gap-2 rounded-lg border border-slate-600 text-slate-300 hover:border-amber-500 hover:text-amber-400 text-sm py-2 transition-colors">' +
+        '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">' +
+          '<path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.338c0 10.28 8.182 18.6 18.375 18.6a18.45 18.45 0 004.518-.563l-4.19-4.19a14.25 14.25 0 01-5.168 1.005c-5.318 0-9.803-3.528-11.52-8.438L2.25 6.338z"/>' +
+        '</svg>' +
+        phone +
+      '</a>'
     : '';
 
   var statusClass = STATUS_CLASSES[status.status] || STATUS_CLASSES.closed;
@@ -61,15 +93,8 @@ function renderCard(service, mode) {
     referralHtml +
     staleHtml +
     verifiedHtml +
-    urlHtml +
-    '<a href="tel:' + phone.replace(/\s/g, '') + '" ' +
-      'aria-label="Call ' + service.name + ' on ' + phone + '" ' +
-      'class="mt-1 w-full flex items-center justify-center gap-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-900 font-semibold text-sm py-2.5 transition-colors">' +
-      '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">' +
-        '<path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.338c0 10.28 8.182 18.6 18.375 18.6a18.45 18.45 0 004.518-.563l-4.19-4.19a14.25 14.25 0 01-5.168 1.005c-5.318 0-9.803-3.528-11.52-8.438L2.25 6.338z"/>' +
-      '</svg>' +
-      phone +
-    '</a>' +
+    primaryBtn +
+    phoneBtn +
   '</article>';
 }
 
@@ -120,9 +145,15 @@ function renderHomeCards(services) {
 var activeHomeCategory = 'all';
 var activeDirectoryCategory = 'all';
 
+function getVisibleServices() {
+  if (ENABLED_CATEGORIES === 'all') return SERVICES;
+  return SERVICES.filter(function(s) { return ENABLED_CATEGORIES.indexOf(s.category) !== -1; });
+}
+
 function buildFilterBar(containerId, activeCategory, onSelect) {
   var container = document.getElementById(containerId);
-  var filters = ['all'].concat(Object.keys(CATEGORIES));
+  var enabledCats = ENABLED_CATEGORIES === 'all' ? Object.keys(CATEGORIES) : ENABLED_CATEGORIES;
+  var filters = enabledCats.length > 1 ? ['all'].concat(enabledCats) : ['all'];
   container.innerHTML = filters.map(function(cat) {
     var label = cat === 'all' ? 'All' : (CATEGORIES[cat] ? CATEGORIES[cat].label : cat);
     var isActive = cat === activeCategory;
@@ -148,18 +179,20 @@ function applyHomeFilter(category) {
   activeHomeCategory = category;
   window.location.hash = category === 'all' ? '' : category;
   buildFilterBar('filter-bar-home', category, applyHomeFilter);
+  var visible = getVisibleServices();
   var filtered = category === 'all'
-    ? SERVICES
-    : SERVICES.filter(function(s) { return s.category === category; });
+    ? visible
+    : visible.filter(function(s) { return s.category === category; });
   renderHomeCards(filtered);
 }
 
 function applyDirectoryFilter(category) {
   activeDirectoryCategory = category;
   buildFilterBar('filter-bar-directory', category, applyDirectoryFilter);
+  var visible = getVisibleServices();
   var filtered = category === 'all'
-    ? SERVICES
-    : SERVICES.filter(function(s) { return s.category === category; });
+    ? visible
+    : visible.filter(function(s) { return s.category === category; });
   renderDirectoryCards(filtered);
 }
 
@@ -215,7 +248,7 @@ document.addEventListener('DOMContentLoaded', function() {
   });
   document.getElementById('nav-directory').addEventListener('click', function(e) {
     e.preventDefault();
-    renderDirectoryCards(SERVICES);
+    renderDirectoryCards(getVisibleServices());
     buildFilterBar('filter-bar-directory', 'all', applyDirectoryFilter);
     showSection('directory');
   });
