@@ -41,7 +41,8 @@ function parseServicesCSV(text) {
       who_for:         o.who_for,
       referral_needed: o.referral_needed === 'yes',
       referral_contact: o.referral_contact || null,
-      last_verified:   o.last_verified
+      last_verified:   o.last_verified,
+      priority:        o.priority === 'yes'
     };
   });
 }

@@ -21,6 +21,19 @@ var STATUS_CLASSES = {
   closed:      'text-slate-600'
 };
 
+var DAY_LABELS = { mon:'Mon', tue:'Tue', wed:'Wed', thu:'Thu', fri:'Fri', sat:'Sat', sun:'Sun' };
+var DAY_ORDER  = ['mon','tue','wed','thu','fri','sat','sun'];
+
+function getDaysLabel(service) {
+  var seen = {};
+  service.opening_hours.forEach(function(slot) {
+    slot.days.forEach(function(d) { seen[d] = true; });
+  });
+  return DAY_ORDER.filter(function(d) { return seen[d]; })
+    .map(function(d) { return DAY_LABELS[d]; })
+    .join(' · ');
+}
+
 function renderCard(service, mode) {
   // mode: 'home' (shows open/closed status) or 'directory' (shows last_verified)
   var status = getServiceStatus(service, getEffectiveNow());
@@ -28,6 +41,11 @@ function renderCard(service, mode) {
   var cat = CATEGORIES[service.category] || CATEGORIES.other;
   var isDimmed = mode === 'home' && status.status === 'closed';
   var phone = service.phone;
+
+  var daysLabel = getDaysLabel(service);
+  var daysHtml = daysLabel
+    ? '<p class="text-xs text-slate-500">' + daysLabel + '</p>'
+    : '';
 
   var tagsHtml = service.what_they_offer.map(function(t) {
     return '<span class="text-xs px-2 py-0.5 rounded-full bg-slate-700 text-slate-300">' + t + '</span>';
@@ -79,6 +97,7 @@ function renderCard(service, mode) {
     '<p class="text-sm text-slate-400 leading-relaxed">' + service.description + '</p>' +
     '<div class="flex flex-wrap gap-1.5">' + tagsHtml + '</div>' +
     '<p class="text-xs text-slate-500">' + service.address + '</p>' +
+    daysHtml +
     (mode === 'home' ? '<p class="text-sm font-medium ' + statusClass + '">' + status.label + '</p>' : '') +
     referralHtml +
     staleHtml +
@@ -120,7 +139,9 @@ function sortForHome(services) {
   return services.slice().sort(function(a, b) {
     var sa = getServiceStatus(a, now).status;
     var sb = getServiceStatus(b, now).status;
-    return (order[sa] || 2) - (order[sb] || 2);
+    if (sa !== sb) return (order[sa] || 2) - (order[sb] || 2);
+    // Within same status: priority services first
+    return (b.priority ? 1 : 0) - (a.priority ? 1 : 0);
   });
 }
 

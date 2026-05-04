@@ -66,6 +66,7 @@ My Service,food,Description here.,123 Example St FY1 1AA,01253 000000,https://ex
 | referral_needed | no | yes or no |
 | referral_contact | Call 01253 000000 | Leave blank if referral_needed = no |
 | last_verified | 2026-05-04 | Always YYYY-MM-DD — never DD/MM/YYYY |
+| priority | yes | yes = appears first within its status group. Leave blank or no for standard order. |
 
 ---
 
